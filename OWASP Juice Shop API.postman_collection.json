@@ -1,0 +1,839 @@
+{
+	"info": {
+		"_postman_id": "5d354715-b2fb-4c15-acef-1236dfff88c8",
+		"name": "OWASP Juice Shop API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "SC1: Sign in the user, add 1 item to the basket, verify that 1 item is in the basket",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"pm.environment.set('token', json_response.authentication.token);",
+									"pm.environment.set('bid', json_response.authentication.bid);",
+									"",
+									"pm.test(\"Status code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://juice-shop.guardrails.ai/rest/user/login",
+							"protocol": "https",
+							"host": [
+								"juice-shop",
+								"guardrails",
+								"ai"
+							],
+							"path": [
+								"rest",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddItem",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"pm.environment.set('id1', json_response.data.id);",
+									"",
+									"pm.test(\"Response code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Status in json data is success\", () => {",
+									"  pm.expect(json_response.status).to.eql(\"success\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ProductId\": 1,\n  \"BasketId\": \"11\",\n  \"quantity\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/BasketItems/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"BasketItems",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "VerifyOneItemInBasket",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var product = pm.response.json().data.Products;",
+									"",
+									"pm.test('Number of products in basket = ' + product.length, function () {",
+									"    pm.expect(product.length).to.equal(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rest/basket/{{bid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rest",
+								"basket",
+								"{{bid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[TearDown] DeleteItemFromBasket",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"",
+									"pm.test(\"Response status code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Status in json data is success\", () => {",
+									"  pm.expect(json_response.status).to.eql(\"success\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/BasketItems/{{id1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"BasketItems",
+								"{{id1}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SC2: Sign in the user, add 2 items to the basket, then delete 1 item and verify only 1 item is in the basket",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"pm.environment.set('token', json_response.authentication.token);",
+									"pm.environment.set('bid', json_response.authentication.bid);",
+									"",
+									"pm.test(\"Status code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://juice-shop.guardrails.ai/rest/user/login",
+							"protocol": "https",
+							"host": [
+								"juice-shop",
+								"guardrails",
+								"ai"
+							],
+							"path": [
+								"rest",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddItemWithProductId=1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"pm.environment.set('id1', json_response.data.id);",
+									"",
+									"pm.test(\"Response code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Status in json data is success\", () => {",
+									"  pm.expect(json_response.status).to.eql(\"success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ProductId\": 1,\n  \"BasketId\": \"11\",\n  \"quantity\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/BasketItems/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"BasketItems",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddItemWithProductId=2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"pm.environment.set('id2', json_response.data.id);",
+									"",
+									"pm.test(\"Response code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Status in json data is success\", () => {",
+									"  pm.expect(json_response.status).to.eql(\"success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ProductId\": 2,\n  \"BasketId\": \"11\",\n  \"quantity\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/BasketItems/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"BasketItems",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteOneItemFromBasket",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"",
+									"pm.test(\"Response status code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Status in json data is success\", () => {",
+									"  pm.expect(json_response.status).to.eql(\"success\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/BasketItems/{{id1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"BasketItems",
+								"{{id1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "VerifyOnlyOneItemInBasket",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var product = pm.response.json().data.Products;",
+									"",
+									"pm.test('Validate only 1 product in basket = ' + product.length, function () {",
+									"    pm.expect(product.length).to.equal(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rest/basket/{{bid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rest",
+								"basket",
+								"{{bid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[TearDown] DeleteItem2FromBasket",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"",
+									"pm.test(\"Response status code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Status in json data is success\", () => {",
+									"  pm.expect(json_response.status).to.eql(\"success\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/BasketItems/{{id2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"BasketItems",
+								"{{id2}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SC3: Sign in the user, add 2 items to the basket, verify that 2 items is in the basket",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"pm.environment.set('token', json_response.authentication.token);",
+									"pm.environment.set('bid', json_response.authentication.bid);",
+									"",
+									"pm.test(\"Status code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://juice-shop.guardrails.ai/rest/user/login",
+							"protocol": "https",
+							"host": [
+								"juice-shop",
+								"guardrails",
+								"ai"
+							],
+							"path": [
+								"rest",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddItemWithProductId1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"pm.environment.set('id1', json_response.data.id);",
+									"",
+									"pm.test(\"Response code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Status in json data is success\", () => {",
+									"  pm.expect(json_response.status).to.eql(\"success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ProductId\": 1,\n  \"BasketId\": \"11\",\n  \"quantity\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/BasketItems/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"BasketItems",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddItemWithProductId2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"pm.environment.set('id2', json_response.data.id);",
+									"",
+									"pm.test(\"Response code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Status in json data is success\", () => {",
+									"  pm.expect(json_response.status).to.eql(\"success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ProductId\": 2,\n  \"BasketId\": \"11\",\n  \"quantity\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/BasketItems/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"BasketItems",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "VerifyTwoItemsInBasket",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var product = pm.response.json().data.Products;",
+									"",
+									"pm.test('Validate there are 2 products in basket = ' + product.length, function (){",
+									"    pm.expect(product.length).to.equal(2);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rest/basket/{{bid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rest",
+								"basket",
+								"{{bid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[TearDown] DeleteItem1FromBasket",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"",
+									"pm.test(\"Response status code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Status in json data is success\", () => {",
+									"  pm.expect(json_response.status).to.eql(\"success\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/BasketItems/{{id1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"BasketItems",
+								"{{id1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[TearDown] DeleteItem2FromBasket",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json_response = pm.response.json();",
+									"",
+									"pm.test(\"Response status code is 200\", () => {",
+									"  pm.expect(pm.response.code).to.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Status in json data is success\", () => {",
+									"  pm.expect(json_response.status).to.eql(\"success\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/BasketItems/{{id2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"BasketItems",
+								"{{id2}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
